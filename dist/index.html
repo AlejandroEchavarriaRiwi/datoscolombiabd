@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,22 +8,20 @@
 </head>
 <body>
     <h1>Datos Colombia</h1>
-    <section class="inputContainer">
-        <form id="inputs">
-            <input style="display:none" type="file" id="file" a=".csv">
-            <button type="button" onclick="document.getElementById('file').click()">Subir archivo</button>
-            <input type="text" id="search" placeholder="Filtrar base de datos">
-            <button>Filtrar</button>
-        </form>
-    </section>
-    <section id="searchContainer">
-        <div id="table">
-        </div>
+
+    <div class="section inputContainer">
+        <input style="display:none" type="file" id="file" a=".csv">
+        <button type="button" onclick="document.getElementById('file').click()">Subir archivo</button>
+        <input type="text" id="search" placeholder="Filtrar base de datos">
+        <button id="filterButton">Filtrar</button>
+
+    </div>
+
+    <div id="searchContainer" class="section">
+        <div id="table"></div>
         <div id="pagination"></div>
-    </section>
-    <section id="graphics">
-        <h3>Estadisticas:</h3>
-    </section>
-    <script type="module" src="./index.js"></script>
+    </div>
+
+    <script src="index.js"></script>
 </body>
 </html>
