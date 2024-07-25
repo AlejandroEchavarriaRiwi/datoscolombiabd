@@ -72,7 +72,7 @@ function processCSV(content: string): RowData[] {
                     if (!/^\d+(\.\d+)?$/.test(value)) {
                         throw new Error(`La fila ${lineIndex + 2}, columna "${column.name}" debe ser un número válido, pero se encontró "${value}"`);
                     }
-                    rowData[column.name] = parseInt(value.split('.')[0], 10);
+                    rowData[column.name] = value; // Mantenemos el valor como string
                     break;
                 case ColumnType.CodeWithSymbols:
                     rowData[column.name] = value;
@@ -133,52 +133,97 @@ function createTable(data: RowData[]): string {
 
 // Función para filtrar los datos
 function filterData(data: RowData[], searchTerm: string): RowData[] {
-    return data.filter(row =>
+    // Revisa si en alguna fila se encuentra el termino buscado
+    const filteredData = data.filter(row =>
         Object.values(row).some(value =>
             value.toString().toLowerCase().includes(searchTerm.toLowerCase())
         )
     );
+
+    // Muestra una alerta si no encuentra el termino buscado
+    if (filteredData.length === 0) {
+        alert(`${searchTerm} no se encuentra en la base de datos`);
+    }
+
+    return filteredData;
+}
+
+// Función para paginar los datos
+function paginateData(data: RowData[], pageSize: number, pageNumber: number): RowData[] {
+    const start = (pageNumber - 1) * pageSize;
+    return data.slice(start, start + pageSize);
+}
+
+// Función para crear los botones de paginación
+function createPagination(totalPages: number, currentPage: number): string {
+    let paginationHTML = '<div class="pagination">';
+    for (let i = 1; i <= totalPages; i++) {
+        paginationHTML += `<button ${i === currentPage ? 'class="active"' : ''} onclick="goToPage(${i})">${i}</button>`;
+    }
+    paginationHTML += '</div>';
+    return paginationHTML;
+}
+
+let allData: RowData[] = [];
+let currentPage = 1;
+const pageSize = 15;
+
+// Función para ir a una página específica
+function goToPage(pageNumber: number) {
+    currentPage = pageNumber;
+    const searchInput = document.querySelector('#search') as HTMLInputElement | null;
+    const searchTerm = searchInput ? searchInput.value : '';
+    const filteredData = filterData(allData, searchTerm);
+    displayTable(filteredData);
+}
+
+// Función para mostrar la tabla y la paginación
+function displayTable(data: RowData[]) {
+    const tableContainer = document.getElementById('table');
+    const paginationContainer = document.getElementById('pagination');
+
+    if (tableContainer && paginationContainer) {
+        const paginatedData = paginateData(data, pageSize, currentPage);
+        const tableHTML = createTable(paginatedData);
+        tableContainer.innerHTML = tableHTML;
+
+        const totalPages = Math.ceil(data.length / pageSize);
+        const paginationHTML = createPagination(totalPages, currentPage);
+        paginationContainer.innerHTML = paginationHTML;
+    }
 }
 
 // Evento principal
 document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.querySelector('#file') as HTMLInputElement;
-    const searchInput = document.querySelector('#search') as HTMLInputElement;
-    let allData: RowData[] = [];
+    const fileInput = document.querySelector('#file') as HTMLInputElement | null;
+    const searchInput = document.querySelector('#search') as HTMLInputElement | null;
+    const filterButton = document.querySelector('#filterButton') as HTMLButtonElement | null;
 
-    fileInput.addEventListener('change', async (event) => {
-        const file = (event.target as HTMLInputElement).files?.[0];
-        if (file) {
-            try {
-                const content = await readCSV(file);
-                allData = processCSV(content);
-                const tableHTML = createTable(allData);
-                const searchContainer = document.querySelector("#searchContainer") as HTMLDivElement || null;
-
-                if (searchContainer) {
-                    const title = document.createElement('h3');
-                    title.innerText = "Resultado:";
-                    searchContainer.insertBefore(title, searchContainer.firstChild);
-
-                    const tableContainer = document.getElementById('table');
-                    if (tableContainer) {
-                        tableContainer.innerHTML = tableHTML;
-                    }
+    if (fileInput && searchInput && filterButton) {
+        fileInput.addEventListener('change', async (event) => {
+            const file = (event.target as HTMLInputElement).files?.[0];
+            if (file) {
+                try {
+                    const content = await readCSV(file);
+                    allData = processCSV(content);
+                    currentPage = 1;
+                    displayTable(allData);
+                } catch (error) {
+                    alert(error);
                 }
-            } catch (error) {
-                console.error('Error al procesar el archivo:', error);
-                alert('Error al procesar el archivo. Asegúrate de que tenga el formato correcto.');
             }
-        }
-    });
+        });
 
-    searchInput.addEventListener('input', (event) => {
-        const searchTerm = (event.target as HTMLInputElement).value;
-        const filteredData = filterData(allData, searchTerm);
-        const tableHTML = createTable(filteredData);
-        const tableContainer = document.getElementById('table');
-        if (tableContainer) {
-            tableContainer.innerHTML = tableHTML;
-        }
-    });
+        filterButton.addEventListener('click', () => {
+            const searchTerm = searchInput.value;
+            const filteredData = filterData(allData, searchTerm);
+            currentPage = 1;
+            displayTable(filteredData);
+        });
+    } else {
+        console.error('No se encontraron todos los elementos necesarios en el DOM');
+    }
 });
+
+// Asignar la función goToPage al objeto window para que esté disponible globalmente
+(window as any).goToPage = goToPage;
