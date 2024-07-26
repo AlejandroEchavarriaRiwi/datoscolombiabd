@@ -10,18 +10,19 @@
     <h1>Datos Colombia</h1>
 
     <div class="section inputContainer">
-        <input style="display:none" type="file" id="file" a=".csv">
+        <input style="display:none" type="file" id="file" accept=".csv">
         <button type="button" onclick="document.getElementById('file').click()">Subir archivo</button>
         <input type="text" id="search" placeholder="Filtrar base de datos">
-        <button id="filterButton">Filtrar</button>
-
     </div>
 
     <div id="searchContainer" class="section">
         <div id="table"></div>
         <div id="pagination"></div>
     </div>
-
-    <script type="module" src="index.js"></script>
+    <div id="chartContainer">
+        <canvas id="municipiosChart"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="../controllers/index.js"></script>
 </body>
 </html>
