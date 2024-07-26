@@ -81,7 +81,9 @@ body{
     transition: 300ms;
     background-color: gray;
 }
-
+#table{
+    margin-top: 30px;
+}
 table {
     border-collapse: collapse;
     width: 100%;
@@ -94,6 +96,19 @@ th, td {
 th {
     background-color: #f2f2f2;
 }
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+th.sortable:hover {
+    background-color: #f0f0f0;
+}
+#pagination{
+    display: flex;
+    justify-content: center;
+}
+
 .pagination button {
     margin: 5px;
     padding: 5px 10px;
@@ -108,6 +123,8 @@ th {
 }
 
 #chartContainer{
+    display: flex;
+    justify-content: center;
     width: 70vw;
 }
 
