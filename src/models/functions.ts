@@ -154,4 +154,22 @@ function convertToCSV(data: RowData[]): string {
     return csvRows.join('\n');
 }
 
-export { RowData, processCSV, filterData, paginateData, processDataForChart, convertToCSV };
+function sortData(data: RowData[], column: string, direction: 'asc' | 'desc'): RowData[] {
+    return [...data].sort((a, b) => {
+        let valueA = a[column];
+        let valueB = b[column];
+
+        // Convertir a número si es posible
+        if (!isNaN(Number(valueA)) && !isNaN(Number(valueB))) {
+            valueA = Number(valueA);
+            valueB = Number(valueB);
+        }
+
+        if (valueA < valueB) return direction === 'asc' ? -1 : 1;
+        if (valueA > valueB) return direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+}
+
+
+export { RowData, processCSV, filterData, paginateData, processDataForChart, convertToCSV, sortData };
