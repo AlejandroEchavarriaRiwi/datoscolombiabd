@@ -38,12 +38,14 @@ function debounce(func: Function, delay: number) {
 
 export function initializeUI(
     handleFileUpload: (file: File) => void,
-    handleFilter: (searchTerm: string) => void
+    handleFilter: (searchTerm: string) => void,
+    handleExport: () => void
 ) {
     const fileInput = document.querySelector('#file') as HTMLInputElement | null;
     const searchInput = document.querySelector('#search') as HTMLInputElement | null;
+    const exportButton = document.querySelector('#exportButton') as HTMLButtonElement | null;
 
-    if (fileInput && searchInput) {
+    if (fileInput && searchInput && exportButton) {
         fileInput.addEventListener('change', (event) => {
             const file = (event.target as HTMLInputElement).files?.[0];
             if (file) {
@@ -59,8 +61,23 @@ export function initializeUI(
             const searchTerm = (event.target as HTMLInputElement).value;
             debouncedHandleFilter(searchTerm);
         });
+        exportButton.addEventListener('click', handleExport);
     } else {
-        console.error('No se encontraron todos los elementos necesarios en el DOM');
+        console.error('No se encontraron todos los elementos necesarios en la interfaz');
+    }
+}
+
+export function downloadCSV(csv: string, filename: string) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 }
 

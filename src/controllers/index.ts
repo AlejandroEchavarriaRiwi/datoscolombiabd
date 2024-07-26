@@ -1,8 +1,8 @@
-import { RowData, processCSV, filterData, paginateData, processDataForChart } from '../models/functions.js';
-import { createTable, createPagination, initializeUI, createChart } from './interface.controllers.js';
-
+import { RowData, processCSV, filterData, paginateData, processDataForChart, convertToCSV } from '../models/functions.js';
+import { createTable, createPagination, initializeUI, createChart, downloadCSV } from './interface.controllers.js';
 let allData: RowData[] = [];
 let currentPage = 1;
+let filteredData: RowData[] = []; // Variable para almacenar los datos filtrados actuales
 const pageSize = 15;
 
 function goToPage(pageNumber: number) {
@@ -44,9 +44,19 @@ async function handleFileUpload(file: File) {
 }
 
 function handleFilter(searchTerm: string) {
-    const filteredData = filterData(allData, searchTerm);
+    filteredData = filterData(allData, searchTerm);
     currentPage = 1;
     displayTable(filteredData);
+}
+
+function handleExport() {
+    if (filteredData.length === 0) {
+        alert('No hay datos para exportar');
+        return;
+    }
+    const csv = convertToCSV(filteredData);
+    const filename = `datos_filtrados_${new Date().toISOString()}.csv`;
+    downloadCSV(csv, filename);
 }
 
 async function readCSV(file: File): Promise<string> {
@@ -59,7 +69,7 @@ async function readCSV(file: File): Promise<string> {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    initializeUI(handleFileUpload, handleFilter);
+    initializeUI(handleFileUpload, handleFilter, handleExport);
 });
 
 // Asignar la función goToPage al objeto window para que esté disponible globalmente
