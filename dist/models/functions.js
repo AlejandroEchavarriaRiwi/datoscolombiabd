@@ -106,4 +106,38 @@ function processDataForChart(data) {
         values: Array.from(departamentos.values())
     };
 }
-export { processCSV, filterData, paginateData, processDataForChart };
+function convertToCSV(data) {
+    if (data.length === 0)
+        return '';
+    const headers = Object.keys(data[0]);
+    const csvRows = [
+        headers.join(','), // Encabezados
+        ...data.map(row => headers.map(header => {
+            var _a;
+            let cell = ((_a = row[header]) === null || _a === void 0 ? void 0 : _a.toString()) || '';
+            // Escapar comillas dobles y envolver en comillas si es necesario
+            cell = cell.includes(',') || cell.includes('"') || cell.includes('\n')
+                ? `"${cell.replace(/"/g, '""')}"`
+                : cell;
+            return cell;
+        }).join(','))
+    ];
+    return csvRows.join('\n');
+}
+function sortData(data, column, direction) {
+    return [...data].sort((a, b) => {
+        let valueA = a[column];
+        let valueB = b[column];
+        // Convertir a número si es posible
+        if (!isNaN(Number(valueA)) && !isNaN(Number(valueB))) {
+            valueA = Number(valueA);
+            valueB = Number(valueB);
+        }
+        if (valueA < valueB)
+            return direction === 'asc' ? -1 : 1;
+        if (valueA > valueB)
+            return direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+}
+export { processCSV, filterData, paginateData, processDataForChart, convertToCSV, sortData };

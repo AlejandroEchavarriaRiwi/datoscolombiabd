@@ -135,5 +135,41 @@ function processDataForChart(data: RowData[]): { labels: string[], values: numbe
     };
 }
 
+function convertToCSV(data: RowData[]): string {
+    if (data.length === 0) return '';
 
-export { RowData, processCSV, filterData, paginateData, processDataForChart };
+    const headers = Object.keys(data[0]);
+    const csvRows = [
+        headers.join(','), // Encabezados
+        ...data.map(row => headers.map(header => {
+            let cell = row[header]?.toString() || '';
+            // Escapar comillas dobles y envolver en comillas si es necesario
+            cell = cell.includes(',') || cell.includes('"') || cell.includes('\n') 
+                ? `"${cell.replace(/"/g, '""')}"` 
+                : cell;
+            return cell;
+        }).join(','))
+    ];
+
+    return csvRows.join('\n');
+}
+
+function sortData(data: RowData[], column: string, direction: 'asc' | 'desc'): RowData[] {
+    return [...data].sort((a, b) => {
+        let valueA = a[column];
+        let valueB = b[column];
+
+        // Convertir a número si es posible
+        if (!isNaN(Number(valueA)) && !isNaN(Number(valueB))) {
+            valueA = Number(valueA);
+            valueB = Number(valueB);
+        }
+
+        if (valueA < valueB) return direction === 'asc' ? -1 : 1;
+        if (valueA > valueB) return direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+}
+
+
+export { RowData, processCSV, filterData, paginateData, processDataForChart, convertToCSV, sortData };

@@ -1,8 +1,15 @@
-export function createTable(data) {
+export function createTable(data, sortColumn = null, sortDirection = null) {
+    if (!data || data.length === 0) {
+        return '<p>No hay datos para mostrar.</p>';
+    }
     const headers = Object.keys(data[0]);
     let tableHTML = '<table><thead><tr>';
     headers.forEach(header => {
-        tableHTML += `<th>${header}</th>`;
+        let sortIndicator = '';
+        if (header === sortColumn) {
+            sortIndicator = sortDirection === 'asc' ? ' ▲' : ' ▼';
+        }
+        tableHTML += `<th class="sortable" data-column="${header}">${header}${sortIndicator}</th>`;
     });
     tableHTML += '</tr></thead><tbody>';
     data.forEach(row => {
@@ -30,10 +37,11 @@ function debounce(func, delay) {
         timeoutId = setTimeout(() => func.apply(this, args), delay);
     };
 }
-export function initializeUI(handleFileUpload, handleFilter) {
+export function initializeUI(handleFileUpload, handleFilter, handleExport) {
     const fileInput = document.querySelector('#file');
     const searchInput = document.querySelector('#search');
-    if (fileInput && searchInput) {
+    const exportButton = document.querySelector('#exportButton');
+    if (fileInput && searchInput && exportButton) {
         fileInput.addEventListener('change', (event) => {
             var _a;
             const file = (_a = event.target.files) === null || _a === void 0 ? void 0 : _a[0];
@@ -48,9 +56,23 @@ export function initializeUI(handleFileUpload, handleFilter) {
             const searchTerm = event.target.value;
             debouncedHandleFilter(searchTerm);
         });
+        exportButton.addEventListener('click', handleExport);
     }
     else {
-        console.error('No se encontraron todos los elementos necesarios en el DOM');
+        console.error('No se encontraron todos los elementos necesarios en la interfaz');
+    }
+}
+export function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 }
 export function createChart(data) {
