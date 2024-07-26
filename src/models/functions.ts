@@ -120,4 +120,20 @@ function paginateData(data: RowData[], pageSize: number, pageNumber: number): Ro
     return data.slice(start, start + pageSize);
 }
 
-export { RowData, processCSV, filterData, paginateData };
+//funcion para procesar los datos a graficar
+function processDataForChart(data: RowData[]): { labels: string[], values: number[] } {
+    const departamentos = new Map<string, number>();
+    
+    data.forEach(row => {
+        const departamento = row['DEPARTAMENTO'] as string;
+        departamentos.set(departamento, (departamentos.get(departamento) || 0) + 1);
+    });
+
+    return {
+        labels: Array.from(departamentos.keys()),
+        values: Array.from(departamentos.values())
+    };
+}
+
+
+export { RowData, processCSV, filterData, paginateData, processDataForChart };

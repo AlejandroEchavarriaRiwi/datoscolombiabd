@@ -7,9 +7,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-// controlador.ts
-import { processCSV, filterData, paginateData } from './models/functions.js';
-import { createTable, createPagination } from './controllers/interface.controllers.js';
+import { processCSV, filterData, paginateData, processDataForChart } from '../models/functions.js';
+import { createTable, createPagination, initializeUI, createChart } from './interface.controllers.js';
 let allData = [];
 let currentPage = 1;
 const pageSize = 15;
@@ -28,43 +27,31 @@ function displayTable(data) {
         const tableHTML = createTable(paginatedData);
         tableContainer.innerHTML = tableHTML;
         const totalPages = Math.ceil(data.length / pageSize);
-        const paginationHTML = createPagination(totalPages, currentPage);
+        const paginationHTML = createPagination(totalPages, currentPage, goToPage);
         paginationContainer.innerHTML = paginationHTML;
+        // Crear y actualizar el gráfico
+        const chartData = processDataForChart(data);
+        createChart(chartData);
     }
 }
-document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.querySelector('#file');
-    const searchInput = document.querySelector('#search');
-    const filterButton = document.querySelector('#filterButton');
-    if (fileInput && searchInput && filterButton) {
-        fileInput.addEventListener('change', (event) => __awaiter(void 0, void 0, void 0, function* () {
-            var _a;
-            const file = (_a = event.target.files) === null || _a === void 0 ? void 0 : _a[0];
-            if (file) {
-                try {
-                    const content = yield readCSV(file);
-                    allData = processCSV(content);
-                    currentPage = 1;
-                    displayTable(allData);
-                }
-                catch (error) {
-                    alert(error);
-                }
-            }
-        }));
-        filterButton.addEventListener('click', () => {
-            const searchTerm = searchInput.value;
-            const filteredData = filterData(allData, searchTerm);
+function handleFileUpload(file) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const content = yield readCSV(file);
+            allData = processCSV(content);
             currentPage = 1;
-            displayTable(filteredData);
-        });
-    }
-    else {
-        console.error('No se encontraron todos los elementos necesarios en el DOM');
-    }
-});
-// Asignar la función goToPage al objeto window para que esté disponible globalmente
-window.goToPage = goToPage;
+            displayTable(allData);
+        }
+        catch (error) {
+            alert(error);
+        }
+    });
+}
+function handleFilter(searchTerm) {
+    const filteredData = filterData(allData, searchTerm);
+    currentPage = 1;
+    displayTable(filteredData);
+}
 function readCSV(file) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
@@ -75,3 +62,8 @@ function readCSV(file) {
         });
     });
 }
+document.addEventListener('DOMContentLoaded', () => {
+    initializeUI(handleFileUpload, handleFilter);
+});
+// Asignar la función goToPage al objeto window para que esté disponible globalmente
+window.goToPage = goToPage;
