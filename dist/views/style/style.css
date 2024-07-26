@@ -102,3 +102,15 @@ th {
     background-color: #b2c5ff;
 
 }
+
+#exportButton{
+    margin: 30px;
+}
+
+#chartContainer{
+    width: 70vw;
+}
+
+canvas{
+    width: 100%;
+}

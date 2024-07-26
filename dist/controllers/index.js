@@ -7,10 +7,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { processCSV, filterData, paginateData, processDataForChart } from '../models/functions.js';
-import { createTable, createPagination, initializeUI, createChart } from './interface.controllers.js';
+import { processCSV, filterData, paginateData, processDataForChart, convertToCSV } from '../models/functions.js';
+import { createTable, createPagination, initializeUI, createChart, downloadCSV } from './interface.controllers.js';
 let allData = [];
 let currentPage = 1;
+let filteredData = []; // Variable para almacenar los datos filtrados actuales
 const pageSize = 15;
 function goToPage(pageNumber) {
     currentPage = pageNumber;
@@ -48,9 +49,18 @@ function handleFileUpload(file) {
     });
 }
 function handleFilter(searchTerm) {
-    const filteredData = filterData(allData, searchTerm);
+    filteredData = filterData(allData, searchTerm);
     currentPage = 1;
     displayTable(filteredData);
+}
+function handleExport() {
+    if (filteredData.length === 0) {
+        alert('No hay datos para exportar');
+        return;
+    }
+    const csv = convertToCSV(filteredData);
+    const filename = `datos_filtrados_${new Date().toISOString()}.csv`;
+    downloadCSV(csv, filename);
 }
 function readCSV(file) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -63,7 +73,7 @@ function readCSV(file) {
     });
 }
 document.addEventListener('DOMContentLoaded', () => {
-    initializeUI(handleFileUpload, handleFilter);
+    initializeUI(handleFileUpload, handleFilter, handleExport);
 });
 // Asignar la función goToPage al objeto window para que esté disponible globalmente
 window.goToPage = goToPage;

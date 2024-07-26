@@ -135,5 +135,23 @@ function processDataForChart(data: RowData[]): { labels: string[], values: numbe
     };
 }
 
+function convertToCSV(data: RowData[]): string {
+    if (data.length === 0) return '';
 
-export { RowData, processCSV, filterData, paginateData, processDataForChart };
+    const headers = Object.keys(data[0]);
+    const csvRows = [
+        headers.join(','), // Encabezados
+        ...data.map(row => headers.map(header => {
+            let cell = row[header]?.toString() || '';
+            // Escapar comillas dobles y envolver en comillas si es necesario
+            cell = cell.includes(',') || cell.includes('"') || cell.includes('\n') 
+                ? `"${cell.replace(/"/g, '""')}"` 
+                : cell;
+            return cell;
+        }).join(','))
+    ];
+
+    return csvRows.join('\n');
+}
+
+export { RowData, processCSV, filterData, paginateData, processDataForChart, convertToCSV };
